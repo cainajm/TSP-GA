@@ -1,16 +1,18 @@
 import matplotlib.pyplot as plt
 import tsp_ga as ga
 import pandas as pd
+import math
 from random import sample
 from mpl_toolkits.basemap import Basemap
 
 
 def get_genes_from(fn, sample_n=0):
     df = pd.read_csv(fn)
-    genes = [ga.Gene(row['city'], row['latitude'], row['longitude'])
+    genes = [ga.Gene(row['city'], row['x'], row['y'])
              for _, row in df.iterrows()]
 
-    return genes if sample_n <= 0 else sample(genes, sample_n)
+    # return genes if sample_n <= 0 else sample(genes, sample_n)
+    return genes
 
 
 def plot(costs, individual, save_to=None):
@@ -32,25 +34,41 @@ def plot_ga_convergence(costs):
     plt.title("GA Convergence")
     plt.xlabel('generation')
     plt.ylabel('cost (KM)')
-    plt.text(x[len(x) // 2], costs[0], 'min cost: {} KM'.format(costs[-1]), ha='center', va='center')
+
+    plt.text(x[len(x) // 2], costs[0], 'min cost: {:.2f} KM'.format(costs[-1]), ha='center', va='center')
     plt.plot(x, costs, '-')
 
 
 def plot_route(individual):
-    m = Basemap(projection='lcc', resolution=None,
-                width=5E6, height=5E6,
-                lat_0=-15, lon_0=-56)
+    m = Basemap(projection='cyl', resolution=None)
 
-    plt.axis('off')
+    plt.axis('on')
+    plt.grid(True)
     plt.title("Shortest Route")
 
+    seq = ""
     for i in range(0, len(individual.genes)):
-        x, y = m(individual.genes[i].lng, individual.genes[i].lat)
+        origin_name = individual.genes[i].name
+        x = individual.genes[i].x
+        y = individual.genes[i].y
 
-        plt.plot(x, y, 'ok', c='r', markersize=5)
+        plt.plot(x, y, 'ok', c='r', marker='o')
         if i == len(individual.genes) - 1:
-            x2, y2 = m(individual.genes[0].lng, individual.genes[0].lat)
+            dest_name = individual.genes[0].name
+            x2 = individual.genes[0].x
+            y2 = individual.genes[0].y
         else:
-            x2, y2 = m(individual.genes[i+1].lng, individual.genes[i+1].lat)
+            dest_name = individual.genes[i+1].name
+            x2 = individual.genes[i+1].x
+            y2 = individual.genes[i+1].y
 
-        plt.plot([x, x2], [y, y2], 'k-', c='r')
+        distance =  math.sqrt(pow(x - x2, 2) + pow(y - y2, 2))
+        if origin_name or not math.isnan(origin_name):
+          print("{} ({},{})".format(origin_name, x, y))
+          seq += origin_name 
+          if i == len(individual.genes) - 1:
+            seq += dest_name
+
+        plt.plot([x, x2], [y, y2], 'k-', c='r', marker='o')
+
+    print(seq)

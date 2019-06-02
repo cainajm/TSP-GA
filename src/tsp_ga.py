@@ -2,20 +2,21 @@ from sys import maxsize
 from time import time
 from random import random, randint, sample
 from haversine import haversine
+import math
 
 
 class Gene:  # City
     # keep distances from cities saved in a table to improve execution time.
     __distances_table = {}
 
-    def __init__(self, name, lat, lng):
+    def __init__(self, name, x, y):
         self.name = name
-        self.lat = lat
-        self.lng = lng
+        self.x = x
+        self.y = y
 
     def get_distance_to(self, dest):
-        origin = (self.lat, self.lng)
-        dest = (dest.lat, dest.lng)
+        origin = (self.x, self.y)
+        dest = (dest.x, dest.y)
 
         forward_key = origin + dest
         backward_key = dest + origin
@@ -26,13 +27,17 @@ class Gene:  # City
         if backward_key in Gene.__distances_table:
             return Gene.__distances_table[backward_key]
 
-        dist = int(haversine(origin, dest))
+        # Haversine is used only when working with latitudes and longitudes
+        # dist = int(haversine(origin, dest))
+
+        # When working with simple coordinates, just calculate the simple distance between them
+        dist = math.sqrt(pow(dest[0] - origin[0], 2) + pow(dest[1] - origin[1], 2))
         Gene.__distances_table[forward_key] = dist
 
         return dist
 
 
-class Individual:  # Route: possible solution to TSP
+class Individual:
     def __init__(self, genes):
         assert(len(genes) > 3)
         self.genes = genes
@@ -81,7 +86,8 @@ class Population:  # Population of individuals
     def gen_individuals(sz, genes):
         individuals = []
         for _ in range(sz):
-            individuals.append(Individual(sample(genes, len(genes))))
+            # individuals.append(Individual(sample(genes, len(genes))))
+            individuals.append(Individual(genes))
         return Population(individuals)
 
     def add(self, route):
@@ -151,7 +157,7 @@ def crossover(parent_1, parent_2):
 def mutate(individual, rate):
     for _ in range(len(individual.genes)):
         if random() < rate:
-            sel_genes = sample(individual.genes, 2)
+            sel_genes = sample(individual.genes[1:], 2)
             individual.swap(sel_genes[0], sel_genes[1])
 
 
