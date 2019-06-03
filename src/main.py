@@ -41,11 +41,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-v', '--verbose', type=int, default=1)
-    parser.add_argument('--pop_size', type=int, default=700, help='Population size')
+    parser.add_argument('--pop_size', type=int, default=600, help='Population size')
     parser.add_argument('--tourn_size', type=int, default=50, help='Tournament size')
-    parser.add_argument('--mut_rate', type=float, default=0.02, help='Mutation rate')
+    parser.add_argument('--mut_rate', type=float, default=0.05, help='Mutation rate')
     parser.add_argument('--n_gen', type=int, default=20, help='Number of equal generations before stopping')
-    parser.add_argument('--cities_fn', type=str, default="data/map10.csv", help='CSV File containing the coordinates of cities')
+    parser.add_argument('--cities_fn', type=str, default="../data/200cities.csv", help='CSV File containing the coordinates of cities')
 
     random.seed(datetime.now())
     args = parser.parse_args()
